@@ -1,0 +1,58 @@
+version: '3'
+services:
+  maltego-trx:
+    image: maltego-trx:gunicorn
+    container_name: maltego-trx
+    build: .
+    ports:
+      - "8080:8080"
+
+  # MongoDB
+  mongodb:
+    image: mongo:4.0.8
+    container_name: mongodb
+    restart: unless-stopped 
+    command: mongod --auth 
+    # && mongoimport --host mongodb --db MedDict --collection dictionary --type json --file /data/database.json --jsonArray"
+    env_file: .env
+    environment:
+      MONGO_INITDB_DATABASE: "${MONGO_INITDB_DATABASE}"
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INITDB_ROOT_USERNAME}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INITDB_ROOT_PASSWORD}"
+      MONGODB_DATA_DIR: /data/db
+      MONGODB_LOG_DIR: /dev/null
+    volumes:
+      - mongodbdata:/data/db
+      - mongoconfigdb:/data/configdb
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - backend
+    ports:
+      - '27017-27019:27017-27019'
+
+  mongo-express: 
+    image: mongo-express 
+    container_name: mexpress
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: "${MONGO_INITDB_ROOT_USERNAME}"
+      ME_CONFIG_MONGODB_ADMINPASSWORD: "${MONGO_INITDB_ROOT_PASSWORD}"      
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_BASICAUTH_USERNAME: "${MEXPRESS_USERNAME}"
+      ME_CONFIG_BASICAUTH_PASSWORD: "${MEXPRESS_PASSWORD}"
+    networks:
+      - backend 
+    restart: unless-stopped 
+    depends_on:
+      - mongodb
+    ports: 
+      - 8081:8081
+
+networks:
+  backend: 
+    driver: bridge 
+
+volumes:
+  mongodbdata:
+    driver: local 
+  mongoconfigdb:
+    driver: local
