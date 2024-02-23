@@ -1,3 +1,5 @@
 maltego_project/
 __pycache__/
 *.pyc
+*.txt
+*.csv
