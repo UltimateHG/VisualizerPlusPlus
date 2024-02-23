@@ -4,7 +4,7 @@ from maltego_trx.transform import DiscoverableTransform
 from maltego_trx.overlays import OverlayPosition, OverlayType
 from transforms import call_collection
 
-class NetworkSummary(DiscoverableTransform):
+class NetworkSummaryMsg(DiscoverableTransform):
     """
     Generate a network summary for a phone number
     """
@@ -38,13 +38,3 @@ class NetworkSummary(DiscoverableTransform):
         summary = list(call_collection.find(query, {"_id": 0}))
         # print(summary)
         return summary
-
-# test in your terminal
-if __name__ == "__main__":
-    summary = NetworkSummary.get_network_summary("0363661308")
-    summary = summary[0]
-    for received in summary["received"]:
-        print(received, summary["received"][received])
-        # received_entity = response.addEntity(PhoneNumber, received)
-        # add a link to the original phone number
-    print(summary)
